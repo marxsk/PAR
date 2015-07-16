@@ -1,0 +1,17 @@
+p {
+    width: 560px;
+}
+
+p.wide {
+    width: 760px;
+}
+
+p.best_par{
+    width: 560px;
+    background-color: #eee; 
+}
+
+a.no_change {
+    text-decoration: None;
+    color: black;
+}

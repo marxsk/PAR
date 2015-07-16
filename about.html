@@ -1,0 +1,67 @@
+<Content-Type: text/html; charset=utf-8\n\n>
+<!doctype html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <link rel="stylesheet" type="text/css" href="style.css">
+ <title>PAR about</title>
+</head>
+<body>
+<table>
+ <tr><td><h1>PAR about</h1>
+ <tr><td>
+  <b><a href="index.cgi">answerer</a> | <a href="testing.html">testing</a> | 
+     <a href="about.html">about</a></b> 
+ <tr><td>
+ <tr><td>
+  <p> PAR is a question answering system created by Matej Stepanek 
+       at Faculty of Informatics at&nbspMasaryk University. This system 
+       is a part of the master's thesis 
+   "<a href='https://is.muni.cz/auth/th/324237/fi_m/dip.pdf' target='_blank'>Automatické zodpovídání dotazů a internetové vyhledávače<a>"
+   (Question Answering and Web Search Engines), where you can find more information.<br>
+   <i>January 2015</i>
+  </p>
+ <tr><td><br>
+ <tr><td><big><b>How does PAR work?</b></big>
+ <tr><td>
+ <tr><td>
+   <b>Answerer</b>
+   <ul>
+    <li>You give a question.</li>
+    <li>PAR processes the question and sends it to the web search engine (Seznam or Google).</li>
+    <li>The search engine returns links to relevant documents.</li>
+    <li>PAR identifies keywords in question.</li>
+    <li>For every link PAR does following:</li>
+	<ul>
+	 <li>gets a content of the web page,</li>
+	 <li>finds a paragraph that contains the most keywords.</li>
+	</ul>
+    <li>From these paragraphs PAR returns the best one.</li>
+   </ul>
+ <tr><td>
+  <p><b>Testing</b><br>
+   <ul>
+    <li>When testing, PAR finds the best paragraph and then searches in it
+	for words from the answer.</li>
+    <li>Paragraph is considered as a correct result if it contains every word
+	from the answer or if<br> the answer is included in the paragraph and 
+        in the title of it's web page together.</li> 
+   </ul>
+  </p>
+ <tr><td>
+  <p><b>General</b>
+   <ul>
+    <li>When searching for matches, all words are converted to lemmata.</li>
+    <li>Both inputs and outputs are in utf-8 encoding.</li>
+    <li>Google results are gained by Custom Search JSON API.
+	(There is a <b>limit</b> - 100 queries per day.)</li>
+    <li>Seznam results are gained by Seznam Search API without any restriction.
+    <li>justext by Jan Pomikálek is used to gain a page content without
+	boilerplate.</li>
+    <li>unitok.py by Jan Pomikálek is used for tokenization.</li>
+    <li>majka by Pavel Šmerk is used for lemmatization.</li>
+   </ul>
+  </p>
+<table>
+</body>
+</html>

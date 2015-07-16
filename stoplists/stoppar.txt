@@ -1,0 +1,8 @@
+město
+obec
+hora
+řeka
+rok
+léto
+let
+zdroj

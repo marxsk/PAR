@@ -1,0 +1,64 @@
+<Content-Type: text/html; charset=utf-8\n\n>
+<!doctype html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <link rel="stylesheet" type="text/css" href="style.css">
+ <title>PAR testing</title>
+</head>
+<body>
+<table>
+ <tr><td><h1><a class="no_change" href="testing.html">PAR testing</a></h1>
+ <tr><td>
+  <b><a href="index.cgi">answerer</a> | <a href="testing.html">testing</a> |
+     <a href="about.html">about</a></b>
+ <tr><td><p class="wide">
+	Load a file with questions and answers. PAR will find the relevant
+	paragraph for every question and check if it contains<br> a given answer.
+	 </p>
+ <tr><td><br>
+ <tr><td><b>Input:</b>
+ <tr><td><p class="wide">
+        A utf-8 encoded Czech plane-text file, where every line contains
+        a question and an answer separated with "#". Use a brief answer
+        not a sentence. Question on the other hand can be a regular
+        Czech sentence. An example:
+ 	 </p>
+ <tr><td><i>Ve kterém roce byla svatořečena Anežka Česká?#1989</i>
+ <tr><td><i>Který zámek na jižní Moravě má v zámeckém parku minaret?#Lednice</i>
+ <tr><td><b>Output:</b>
+ <tr><td><p class="wide">
+	For every line of the input there are 2 lines in the output
+        text. The first is just copy of question#answer line. The second has
+        this form: success#title#link#paragraph, where success is 1 when 
+	the found paragraph or title contains the given answer and 0 otherwise. 
+	Title is a title of the page where the paragraph was found. And link
+	is a link to that page. An example:
+	 </p>
+ <tr><td><i>Kde sídlí vláda České Republiky?#Strakova akademie</i>
+ <tr><td><p class="wide"><i>
+  1#Vláda České republiky - Wikipedie#http://cs.wikipedia.org/wiki/Vl%C3%A1da_%C4%8Cesk%C3%A9_republiky<br>#Vláda České republiky je vrcholný orgán výkonné moci v České republice . Její postavení vymezuje Ústava České republiky . Úřad vlády České republiky sídlí v budově Strakovy akademie v Praze na Malé Straně .
+    </i></p>  
+ <tr><td>
+ <form action="test.cgi" target="results" method="post" enctype="multipart/form-data">
+ <tr><td><b>Search engine to use:</b>
+ <tr><td><input type="radio" name="SE" value="seznam" checked>Seznam
+         <input type="radio" name="SE" value="google">Google<br><br>
+ <tr><td><b>File with questions and answers:</b>
+ <tr><td><input type="file" name="input" accept=".txt">
+	 <input type="submit" value="Start testing">
+ </form>
+ <tr><td><br>
+ <tr><td><b>Results:</b>
+</table>
+
+<script type="text/javascript">
+  function resizeIframe(iframe) {
+    iframe.height = iframe.contentWindow.document.body.scrollHeight + "px";
+  }
+</script>
+
+<iframe onload="resizeIframe(this)" name="results" src="test.cgi" frameborder="1" width="100%" scrolling="no">
+</iframe>
+</body>
+</html>
