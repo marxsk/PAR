@@ -7,23 +7,28 @@ import urllib2
 import requests
 import justext
 import time
+import json
 
 UNITOK_PATH = '/nlp/corpora/programy/unitok.py'
 MAJKA_PATH = '/nlp/projekty/ajka/bin/majka'
 DESAMB_PATH = '/nlp/corpora/programy/desamb.utf8.sh'
 STOPLIST_QUESTION = './stoplists/stopquestion.txt'
 STOPLIST_PARAGRAPH = './stoplists/stoppar.txt'
-
+SECRET_FILE = "./secrets"
 
 class Seznam:
     """Python interface to Seznam search API. 
     """
+    def __init__(self, options):
+        self._userid = options["userid"]
+        self._client = options["client"]
+
     def get_json(self, query):
 	"""Sends query to seznam search API and returns JSON search results.
 	"""
-        query_parameters = {'format':'json', 'client':'muni_fi_nlplab',
+        query_parameters = {'format':'json', 'client':self._client,
 			    'source':'web', 'query':query,
-			    'userId':'muni_fi_nlplab'}
+			    'userId':self._userid}
         results = requests.get("http://searchapi.seznam.cz/api2/search",
                                params = query_parameters)
         json_results = results.json()
@@ -72,11 +77,9 @@ class Google:
     GENERAL_ID = "000286326552965592600:ujcjofmbh7w"
     # https://www.google.cz/cse/publicurl?cx=000286326552965592600:ujcjofmbh7w
     
-    def __init__(self):
+    def __init__(self, options):
         self.cse_id = self.GENERAL_ID
-	# When you exceed the limit of queries, simply use another project.
-        self.project_key = "AIzaSyDP25rjvTeMtKETbkxll5O6xfeT2sbN5ow"
-	#self.project_key = "AIzaSyDBSZCCUdN9E2WdYPcBK7_63vyoRzoEZnE"        
+        self.project_key = options["project_id"]
 
     def get_json(self, query):
         """Returns JSON results of CSE for given query.
@@ -305,10 +308,11 @@ class Answerer:
 	#    print k, '<br>'
 
         # get web search engine results
+        options = json.load(open(SECRET_FILE))
         if SE == 'seznam':
-	    cse = Seznam()
+	    cse = Seznam(options["engines"]["Seznam"])
 	else:
-	    cse = Google()
+	    cse = Google(options["engines"]["Google"])
         links_titles = cse.get_links_titles(query)
 
         # if CSE returns no results, reduce the query
