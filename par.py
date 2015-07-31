@@ -365,10 +365,10 @@ class Answerer:
         best_title = best_title.encode('utf-8','replace')
 
 	konec = time.time()
-	print '<br>vse: ',konec - zacatek,'<br>'
-	print 'otazka + SE: ', stred - zacatek, '<br>'
-	print 'unitok: ', self.unitok, '<br>'
-	print 'majka: ', self.majka, '<br>'
+#	print '<br>vse: ',konec - zacatek,'<br>'
+#	print 'otazka + SE: ', stred - zacatek, '<br>'
+#	print 'unitok: ', self.unitok, '<br>'
+#	print 'majka: ', self.majka, '<br>'
 
         return (best_par,best_link,best_title,best_score,best_matches)
 
