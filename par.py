@@ -8,6 +8,13 @@ import requests
 import justext
 import time
 import json
+import sys
+import codecs
+
+sys.path.append("unitok")
+sys.path.append("pymajka")
+import unitok
+import pymajka
 
 UNITOK_PATH = '/nlp/corpora/programy/unitok.py'
 MAJKA_PATH = '/nlp/projekty/ajka/bin/majka'
@@ -15,6 +22,9 @@ DESAMB_PATH = '/nlp/corpora/programy/desamb.utf8.sh'
 STOPLIST_QUESTION = './stoplists/stopquestion.txt'
 STOPLIST_PARAGRAPH = './stoplists/stoppar.txt'
 SECRET_FILE = "./secrets"
+
+MAJKA_LIB = "./pymajka/majka/libmajka.so"
+MAJKA_DICT = "./pymajka/majka/majka.w-lt"
 
 class Seznam:
     """Python interface to Seznam search API. 
@@ -128,7 +138,7 @@ class Answerer:
 	(From utf-8 text file with one stopword per line.)
         """
         stoplist = []
-        with open(file_name, 'r') as stopfile:
+        with codecs.open(file_name, 'r', "utf-8") as stopfile:
             for line in stopfile:
                 stoplist.append(line[:-1])
         stopfile.closed
@@ -141,43 +151,36 @@ class Answerer:
         https://www.sketchengine.co.uk/documentation/attachment/wiki/Website/LanguageResourcesAndTools/unitok.py
         """
 	start = time.time()
-        p1 = subprocess.Popen(['echo', '-n', text], stdout=subprocess.PIPE)
-        unitok_output = subprocess.check_output([UNITOK_PATH, '-n', '-a', '-l', 'czech'],
-                                                stdin=p1.stdout)
-        p1.stdout.close()
-	cil = time.time()
+	# @todo: Do this in a better place this is just a hack
+        text = text.decode("utf-8")
+
+	tokens = []
+        tokens.extend(unitok.tokenise(unitok.normalise(text), unitok.LANGUAGE_DATA["czech"], False, True))
+        # @todo: hack?
+        tokens = [t for t in tokens if not t.strip() == ""]
+        cil = time.time()
 	self.unitok += (cil - start)
-        return unitok_output
-        
+        return tokens
+
     def add_lemmata_tags(self, tokens):
         """For every token finds its lemma and morfological tag.
 
-        Uses majka tagger. http://nlp.fi.muni.cz/czech-morphology-analyser/ 
+        Uses majka morphological analyzer. http://nlp.fi.muni.cz/czech-morphology-analyser/ 
         Returns list of tuples (token,lemma,tag).
         """
 	start = time.time()
-        p1 = subprocess.Popen(['echo', '-n', tokens], stdout=subprocess.PIPE)
-	majka_output  = subprocess.check_output([MAJKA_PATH, '-p'], stdin=p1.stdout)
-        p1.stdout.close()
 
-        lines = majka_output.split('\n')
-        tokens_lemmata_tags = []
+	majka = pymajka.Majka(MAJKA_DICT, library=MAJKA_LIB)
+	tuples = []
 
-        for line in lines:
-            trio  = line.split(':')
-	    if len(trio) >= 3:
-                token = trio[0]
-                lemma = trio[1]
-            	tag = trio[2]
-	    else:
-		token = trio[0]
-		lemma = token
-		tag = 'unknown'
-            tokens_lemmata_tags.append((token,lemma,tag))
-		
+	for token in tokens:
+	    for t in majka.get_tuple(token):
+                t.insert(0, token)
+                tuples.append(t)
+
         cil = time.time()
 	self.majka += (cil - start)    
-        return tokens_lemmata_tags
+        return tuples
     
     def get_main_words(self, tokens, stopfile=None, output='lemmata'):
         """For given text returns list of "main words". That means words
@@ -186,8 +189,8 @@ class Answerer:
         tlt = self.add_lemmata_tags(tokens)
 
         # remove pronouns, prepositions, conjunctions, "by, aby, kdyby"
-        unwanted = ('k3','k7','k8','kY')
-        tlt = [(token,lemma,tag) for (token,lemma,tag) in tlt if not tag.startswith(unwanted)]
+        unwanted = (u'k3',u'k7',u'k8',u'kY')
+        tlt = [(token,lemma,tag) for [token,lemma,tag] in tlt if not tag.startswith(unwanted)]
  
         # remove tokens with length 1
         tlt = [(token,lemma,tag) for (token,lemma,tag) in tlt if len(token) > 1]
@@ -258,14 +261,12 @@ class Answerer:
         the beginning of the web page.)
         """
         record = []
-	together = '#'.join(paragraphs)
-	tokens = self.tokenize(together)
-	tokenized_pars = tokens.split('#')
+        for i,par in enumerate(paragraphs):
+            tokens = self.tokenize(par)
 
-        for i,par in enumerate(tokenized_pars):
             if i == num_paragraphs:
                 break
-            main_words = self.get_main_words(par, STOPLIST_PARAGRAPH) 
+            main_words = self.get_main_words(tokens, STOPLIST_PARAGRAPH) 
             (score, matches) = self.rank_par(main_words, keywords)
             record.append((score,matches))
         best = record.index(max(record))
@@ -364,10 +365,10 @@ class Answerer:
         best_title = best_title.encode('utf-8','replace')
 
 	konec = time.time()
-	#print '<br>vse: ',konec - zacatek,'<br>'
-	#print 'otazka + SE: ', stred - zacatek, '<br>'
-	#print 'unitok: ', self.unitok, '<br>'
-	#print 'majka: ', self.majka, '<br>'
+	print '<br>vse: ',konec - zacatek,'<br>'
+	print 'otazka + SE: ', stred - zacatek, '<br>'
+	print 'unitok: ', self.unitok, '<br>'
+	print 'majka: ', self.majka, '<br>'
 
         return (best_par,best_link,best_title,best_score,best_matches)
 
